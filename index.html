@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project design checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F1E7; --surface:#FFFFFF; --surface-2:#FBF8F2;
+  --ink:#585858; --ink-strong:#404040; --ink-soft:#86807A; --line:#E6DFD2;
+  --orange:#F88828; --orange-soft:#FDEEDD; --orange-ink:#A4520A; --done:#585858; --on-orange:#2B2B2B;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#242321; --surface:#2E2C2A; --surface-2:#353330;
+    --ink:#E4DFD7; --ink-strong:#F4F0EA; --ink-soft:#A8A198; --line:#46423E;
+    --orange:#F88828; --orange-soft:#45311F; --orange-ink:#FFB066; --done:#CFC9C0; --on-orange:#2B2B2B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#242321; --surface:#2E2C2A; --surface-2:#353330;
+  --ink:#E4DFD7; --ink-strong:#F4F0EA; --ink-soft:#A8A198; --line:#46423E;
+  --orange:#F88828; --orange-soft:#45311F; --orange-ink:#FFB066; --done:#CFC9C0; --on-orange:#2B2B2B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.55}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ink-strong);outline-offset:2px}
+
+.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 24px;padding:18px clamp(16px,4vw,40px);background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:500;color:var(--ink-soft);font-size:.9rem}
+.brand::before{content:"";width:14px;height:14px;background:var(--orange);border-radius:2px;display:inline-block}
+h1{margin:0;font-size:1.45rem;font-weight:600;color:var(--ink-strong);letter-spacing:-.01em}
+.sync{margin:0;font-size:.82rem;color:var(--ink-soft)}
+
+.wrap{display:grid;grid-template-columns:310px minmax(0,1fr);min-height:calc(100vh - 70px)}
+aside{background:var(--surface-2);border-right:1px solid var(--line);padding:20px 16px 32px}
+main{padding:24px clamp(16px,4vw,48px) 72px;max-width:900px;width:100%}
+@media (max-width:820px){.wrap{grid-template-columns:1fr} aside{border-right:0;border-bottom:1px solid var(--line)}}
+
+.alert{margin:0 0 18px;padding:12px 14px;border-left:4px solid var(--orange);background:var(--orange-soft);border-radius:6px}
+.alert.is-clear{border-left-color:var(--line);background:transparent}
+.alert p{margin:0}
+.alert-title{font-weight:600;color:var(--ink-strong)}
+.alert-sub{font-size:.85rem;margin-top:2px !important}
+.alert ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--orange);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:.82rem;cursor:pointer}
+.chip:hover{background:var(--orange);color:var(--on-orange)}
+
+.btn{font-weight:500;padding:9px 16px;border-radius:6px;border:1.5px solid var(--ink);background:transparent;color:var(--ink-strong);cursor:pointer}
+.btn:hover{background:var(--surface)}
+.btn-primary{background:var(--orange);border-color:var(--orange);color:var(--on-orange)}
+.btn-primary:hover{background:#E97A1C;border-color:#E97A1C}
+.btn-block{width:100%}
+.btn-quiet{border-color:transparent;color:var(--ink-soft);padding-left:0;padding-right:0}
+.btn-quiet:hover{background:transparent;color:var(--ink-strong)}
+.btn-danger{border-color:var(--orange-ink);color:var(--orange-ink)}
+
+.backup{display:flex;gap:18px;margin-top:24px;padding-top:12px;border-top:1px solid var(--line);font-size:.85rem}
+.backup .btn{font-size:.85rem}
+.side-h{font-size:.85rem;font-weight:500;color:var(--ink-soft);margin:22px 4px 6px}
+.client-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:2px}
+.client{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;width:100%;text-align:left;padding:10px 12px;border:1px solid transparent;border-radius:8px;background:transparent;cursor:pointer}
+.client:hover{background:var(--surface)}
+.client[aria-current="true"]{background:var(--surface);border-color:var(--line);box-shadow:inset 3px 0 0 var(--orange)}
+.client-name{font-weight:600;color:var(--ink-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.client-sub{font-size:.8rem;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.client-status{font-size:.8rem;text-align:right;white-space:nowrap}
+.client-meet{font-size:.8rem;text-align:right;color:var(--ink-soft);white-space:nowrap}
+.client-meet.miss{color:var(--orange-ink);font-weight:600}
+.muted{color:var(--ink-soft);font-size:.9rem;margin:12px 4px}
+
+.rules{border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:0 0 28px}
+.rules summary{padding:12px 16px;font-weight:600;color:var(--ink-strong);cursor:pointer}
+.rules-lead{margin:0 16px 12px;font-size:.9rem;color:var(--ink-soft)}
+.rules ul{margin:0;padding:0 20px 4px 36px}
+.rules li{margin:0 0 10px;max-width:68ch}
+.rules strong{color:var(--ink-strong);font-weight:600}
+.settings{display:flex;flex-wrap:wrap;gap:10px 28px;padding:12px 16px 16px;border-top:1px solid var(--line);font-size:.88rem}
+.settings input{width:4.5em;margin:0 6px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2);text-align:center}
+
+.empty{padding:24px 0}
+.empty p{margin:0 0 16px;max-width:52ch}
+
+.field label,.notes-label{display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:4px}
+.field input,.add-form input,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.field input:focus,.add-form input:focus,textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 1px var(--orange)}
+.name-input{width:100%;font-size:1.7rem;font-weight:600;color:var(--ink-strong);border:0;border-bottom:1.5px solid transparent;background:transparent;padding:2px 0;letter-spacing:-.01em}
+.name-input:hover{border-bottom-color:var(--line)}
+.name-input:focus{outline:none;border-bottom-color:var(--orange)}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
+.field.miss input{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange)}
+.miss-note{font-size:.78rem;color:var(--orange-ink);margin-top:4px;min-height:1em}
+
+.now{margin:22px 0 0;font-weight:500;color:var(--ink-strong)}
+.rail{list-style:none;padding:0;margin:10px 0 8px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+.rail button{width:100%;border:0;background:none;padding:0;text-align:left;cursor:pointer;color:var(--ink-soft);font-size:.78rem}
+.rail .bar{display:block;height:10px;border-radius:2px;background:var(--line);margin-bottom:6px}
+.rail .done .bar{background:var(--done)}
+.rail .current .bar{background:var(--orange)}
+.rail .current button{color:var(--ink-strong);font-weight:600}
+@media (max-width:480px){.rail button{font-size:.68rem}}
+
+.phase{padding:26px 0 22px;border-top:1px solid var(--line);scroll-margin-top:16px}
+.rail + .phase{margin-top:18px}
+.phase-head{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:start}
+.num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:.85rem;border:1.5px solid var(--line);color:var(--ink-soft);margin-top:1px}
+.is-current .num{background:var(--orange);border-color:var(--orange);color:var(--on-orange)}
+.is-complete .num{background:var(--done);border-color:var(--done);color:var(--surface)}
+.phase h3{margin:0;font-size:1.1rem;font-weight:600;color:var(--ink-strong)}
+.lead{margin:1px 0 0;font-size:.88rem;color:var(--ink-soft)}
+.count{font-size:.82rem;color:var(--ink-soft);white-space:nowrap;padding-top:3px}
+.indent{margin-left:46px}
+@media (max-width:560px){.indent{margin-left:0}}
+
+.steps{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:1px}
+.step{position:relative;display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:12px;align-items:start;padding:8px 10px;border-radius:6px;cursor:pointer}
+.step:hover{background:var(--surface)}
+.step input{position:absolute;left:10px;top:9px;width:22px;height:22px;margin:0;opacity:0;cursor:pointer}
+.box{width:20px;height:20px;margin-top:2px;border:1.5px solid var(--ink-soft);border-radius:4px;display:grid;place-items:center;background:var(--surface)}
+.step input:checked + .box{background:var(--orange);border-color:var(--orange)}
+.step input:checked + .box::after{content:"";width:10px;height:5px;border-left:2px solid var(--on-orange);border-bottom:2px solid var(--on-orange);transform:translateY(-1px) rotate(-45deg)}
+.step input:focus-visible + .box{outline:2px solid var(--ink-strong);outline-offset:2px}
+.is-done .step-text{color:var(--ink-soft)}
+.stamp{font-size:.76rem;color:var(--ink-soft);padding-top:3px;white-space:nowrap}
+
+.round{margin-top:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+.round summary{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;cursor:pointer;font-weight:500;color:var(--ink-strong)}
+.round .steps{margin:0 4px 8px}
+
+.notice{margin-top:14px;padding:12px 14px;border-left:4px solid var(--orange);background:var(--orange-soft);border-radius:6px;font-size:.9rem;color:var(--ink-strong)}
+.settle{margin-top:16px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.settle p{margin:0;font-size:.85rem;color:var(--ink-soft)}
+.choice{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}
+.choice .btn[aria-pressed="true"]{background:var(--ink-strong);border-color:var(--ink-strong);color:var(--surface)}
+.branch-lead{margin:14px 0 0;font-size:.88rem;color:var(--ink-soft)}
+.finish{margin-top:16px;padding:14px 16px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-weight:500;color:var(--ink-strong)}
+
+.notes{padding-top:24px;border-top:1px solid var(--line)}
+textarea{resize:vertical;min-height:110px}
+.danger{margin-top:24px}
+
+.add-form{max-width:520px;display:grid;gap:14px}
+.add-form h2{margin:0;font-size:1.3rem;color:var(--ink-strong)}
+.add-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-actions{display:flex;gap:10px;align-items:center}
+.form-err{color:var(--orange-ink);font-size:.85rem;margin:0;min-height:1.2em}
+
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);max-width:calc(100% - 32px);background:var(--ink-strong);color:var(--surface);padding:10px 16px;border-radius:6px;font-size:.9rem;z-index:10}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important;transition:none !important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <div class="brand">Zip Kit Homes</div>
+    <h1>Project design checklist</h1>
+  </div>
+  <p class="sync" id="syncNote"></p>
+</header>
+
+<div class="wrap">
+  <aside>
+    <div id="alert" class="alert" hidden></div>
+    <button type="button" class="btn btn-primary btn-block" id="addBtn">Add project</button>
+    <div id="roster"></div>
+    <div class="backup">
+      <button type="button" class="btn btn-quiet" id="exportBtn">Download backup</button>
+      <label class="btn btn-quiet" for="importFile">Load backup</label>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+    </div>
+  </aside>
+
+  <main id="main">
+    <details class="rules" id="rules">
+      <summary>How every project runs</summary>
+      <p class="rules-lead">Every project goes through these steps, in this order. No exceptions.</p>
+      <ul>
+        <li><strong>The discovery call is 30 minutes, and it belongs to the client.</strong> Keep your intro to about two minutes. The one-pager covers the Zip Kit process, so the call can stay on their goals and vision.</li>
+        <li><strong>Draw between meetings, not during them.</strong> Block drawing time on your calendar the same day as each call.</li>
+        <li><strong>Every meeting after the first is a review.</strong> Send the drawings ahead, collect feedback as a change list, and make the changes afterward.</li>
+        <li><strong>Three rounds or fewer.</strong> If round three ends and the design still isn't settled, flag it to Penguin or sales.</li>
+        <li><strong>Sven approves the full design first.</strong> Then the window and door schedule, then client sign-off pending quote.</li>
+        <li><strong>The quote decides the ending.</strong> If they like it, it goes to contract and your part is done. If they want to scale down, they get one final revision, then contract.</li>
+        <li><strong>Book the next meeting before you hang up.</strong> Every Monday, call or email anyone who doesn't have one on the calendar.</li>
+      </ul>
+      <div class="settings">
+        <label>Drawing time after each meeting<input id="setHours" inputmode="decimal" autocomplete="off">hours</label>
+        <label>Send drawings<input id="setDays" inputmode="numeric" autocomplete="off">business days before a review</label>
+      </div>
+    </details>
+
+    <div id="loadingView"><p class="muted">Loading projects…</p></div>
+
+    <div id="emptyView" class="empty" hidden>
+      <p id="emptyText"></p>
+      <button type="button" class="btn" id="emptyAdd">Add project</button>
+    </div>
+
+    <div id="addView" hidden></div>
+
+    <div id="clientView" hidden>
+      <div id="meta"></div>
+      <div id="body"></div>
+      <div id="notes" class="notes"></div>
+      <div id="danger" class="danger"></div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Process definition ---------- */
+function hoursPhrase(s){ var h = Number(s.drawHours); return h > 0 ? h + (h === 1 ? " hour" : " hours") + " of " : ""; }
+function daysPhrase(s){ var d = Number(s.sendDays); return d > 0 ? "at least " + d + (d === 1 ? " business day" : " business days") + " before the review" : "ahead of the review"; }
+
+var PHASES = [
+  { id:"prep", short:"Prep", title:"Before the first call", lead:"Sales books it. You show up ready.", steps:[
+    { k:"prep_book", t:"Sales books the 30-minute discovery call" },
+    { k:"prep_onepager", t:"Client gets the Zip Kit process one-pager ahead of the call" },
+    { k:"prep_notes", t:"Read the lead notes from sales" }
+  ]},
+  { id:"discovery", short:"Discovery", title:"Discovery call", lead:"30 minutes. The client does most of the talking.", steps:[
+    { k:"disc_intro", t:"Keep your intro to about two minutes" },
+    { k:"disc_goals", t:"Hear their goals, vision, must-haves, site, and budget range" },
+    { k:"disc_next", t:"Walk through what happens next (the one-pager covers the rest)" },
+    { k:"disc_book", t:"Book review 1 before you hang up" },
+    { k:"disc_block", t:function(s){ return "Block " + hoursPhrase(s) + "drawing time on your calendar today"; } }
+  ]},
+  { id:"rounds", short:"Rounds", title:"Design rounds", lead:"Reviews, not working sessions. Three rounds max." },
+  { id:"internal", short:"Sven", title:"Internal approval", lead:"Sven approves the full design before anything goes to the client.", steps:[
+    { k:"int_set", t:"Full design set prepped for Sven" },
+    { k:"int_sven", t:"Sven approves the full design" },
+    { k:"int_wd", t:"Window and door schedule prepared" },
+    { k:"int_quotes", t:"Door and window quotes sent out" }
+  ]},
+  { id:"signoff", short:"Sign-off", title:"Client sign-off", lead:"The client approves the plans, pending the quote.", steps:[
+    { k:"so_send", t:"Sign-off sent in DocuSign: plans approved pending quote" },
+    { k:"so_signed", t:"Client signed" }
+  ]},
+  { id:"quote", short:"Quote", title:"Quote decision", lead:"One of two paths. Both end at contract.", steps:[
+    { k:"q_delivered", t:"Quote delivered to the client" }
+  ]}
+];
+var ROUND_STEPS = [
+  { k:"draw", t:function(s){ var h = hoursPhrase(s); return h ? "Drawing time done (" + h.replace(" of ", "") + " blocked)" : "Drawing time done"; } },
+  { k:"send", t:function(s){ return "Drawings sent " + daysPhrase(s) + " (PDF or Autodesk viewer link)"; } },
+  { k:"review", t:"Review held, with feedback written as a change list and nothing drawn live" },
+  { k:"recap", t:"Recap email with the change list sent to the client" },
+  { k:"book", t:"Next meeting booked on the call, and drawing time blocked" }
+];
+var ACCEPT = [
+  { k:"acc_contract", t:"Contract signed" },
+  { k:"acc_drafters", t:"Folder handed to the drafters" }
+];
+var SCALE = [
+  { k:"sc_book", t:"Final revision meeting booked" },
+  { k:"sc_revision", t:"Final revision drawn and reviewed with the client" },
+  { k:"sc_requote", t:"Updated quote delivered" },
+  { k:"sc_contract", t:"Contract signed" },
+  { k:"sc_drafters", t:"Folder handed to the drafters" }
+];
+
+/* ---------- State ---------- */
+var clients = {};
+var settings = { drawHours:"", sendDays:"" };
+var selectedId = null, addOpen = false, loading = true, loadError = "", renderedId = null;
+var backend = null;
+var writing = {}, dirty = {}, metaTimers = {}, roundOpen = {};
+var settingsTimer = null, firstLoad = true;
+
+var $ = function(s){ return document.querySelector(s); };
+var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function el(tag, props){
+  var n = document.createElement(tag);
+  props = props || {};
+  Object.keys(props).forEach(function(k){
+    var v = props[k];
+    if (v == null || v === false) return;
+    if (k === "class") n.className = v;
+    else if (k.slice(0,2) === "on") n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? "" : v);
+  });
+  for (var i = 2; i < arguments.length; i++) append(n, arguments[i]);
+  return n;
+}
+function append(n, kid){
+  if (kid == null || kid === false) return;
+  if (Array.isArray(kid)) { kid.forEach(function(k){ append(n, k); }); return; }
+  n.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+}
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function pad(n){ return n < 10 ? "0" + n : "" + n; }
+function todayStr(){ var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
+function fmtDate(s){
+  if (typeof s !== "string") return "";
+  var p = s.split("-").map(Number);
+  if (p.length !== 3 || !p[0]) return "";
+  return new Date(p[0], p[1]-1, p[2]).toLocaleDateString(undefined, { month:"short", day:"numeric" });
+}
+function fmtStamp(iso){ var d = new Date(iso); return isNaN(d) ? "" : d.toLocaleDateString(undefined, { month:"short", day:"numeric" }); }
+function textOf(step){ return typeof step.t === "function" ? step.t(settings) : step.t; }
+function chk(c, k){ return !!(c.checks && c.checks[k]); }
+function allChecked(c, steps, prefix){ return steps.every(function(s){ return chk(c, (prefix || "") + s.k); }); }
+function nameOf(c){ return (c.name && String(c.name).trim()) || "Untitled project"; }
+
+/* ---------- Progress logic ---------- */
+function isDone(c){
+  if (!chk(c, "q_delivered")) return false;
+  if (c.decision === "accepted") return allChecked(c, ACCEPT);
+  if (c.decision === "scale") return allChecked(c, SCALE);
+  return false;
+}
+function phaseDone(c, id){
+  if (id === "rounds") return !!c.settled;
+  if (id === "quote") return isDone(c);
+  var p = PHASES.filter(function(x){ return x.id === id; })[0];
+  return allChecked(c, p.steps);
+}
+function currentPhase(c){
+  for (var i = 0; i < PHASES.length; i++) if (!phaseDone(c, PHASES[i].id)) return i;
+  return PHASES.length;
+}
+function roundCount(c, n){ return ROUND_STEPS.filter(function(s){ return chk(c, "r" + n + "_" + s.k); }).length; }
+function currentRound(c){
+  for (var n = 1; n <= 3; n++) if (roundCount(c, n) < ROUND_STEPS.length) return n;
+  return 3;
+}
+function needsMeeting(c){
+  if (isDone(c)) return false;
+  if (currentPhase(c) <= 2) return true;
+  return c.decision === "scale" && chk(c, "q_delivered") && !chk(c, "sc_revision");
+}
+function needsBooking(c){ return needsMeeting(c) && !(c.nextMeeting && c.nextMeeting >= todayStr()); }
+function statusLabel(c){
+  if (isDone(c)) return "Done";
+  var i = currentPhase(c);
+  if (PHASES[i].id === "rounds") return "Round " + currentRound(c) + " of 3";
+  if (PHASES[i].id === "quote" && c.decision === "scale") return "Final revision";
+  return PHASES[i].title;
+}
+
+/* ---------- Storage backends ---------- */
+function localBackend(){
+  var K = "zk-design-checklist-v1";
+  function read(){ try { return JSON.parse(localStorage.getItem(K)) || { clients:{}, settings:{} }; } catch(e){ return { clients:{}, settings:{} }; } }
+  function write(d){ try { localStorage.setItem(K, JSON.stringify(d)); } catch(e){} }
+  return {
+    newId: function(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); },
+    watchClients: function(cb){ cb(read().clients || {}); },
+    watchSettings: function(cb){ cb(read().settings || {}); },
+    setClient: function(id, body){ var d = read(); d.clients = d.clients || {}; d.clients[id] = body; write(d); return Promise.resolve(); },
+    deleteClient: function(id){ var d = read(); if (d.clients) delete d.clients[id]; write(d); return Promise.resolve(); },
+    setSettings: function(body){ var d = read(); d.settings = body; write(d); return Promise.resolve(); }
+  };
+}
+function withRetry(fn){
+  return fn().catch(function(e){
+    if (e && e.code === "unavailable") {
+      return new Promise(function(r){ setTimeout(r, 400 + Math.random()*600); }).then(fn);
+    }
+    throw e;
+  });
+}
+function dbBackend(db){
+  var col = db.collection("clients");
+  var settingsDoc = db.doc("settings/process");
+  return {
+    newId: function(){ return col.doc().id; },
+    watchClients: function(cb, onErr){
+      return col.onSnapshot(function(snap){
+        var o = {};
+        snap.docs.forEach(function(d){ if (d.exists) o[d.id] = d.data(); });
+        cb(o);
+      }, onErr);
+    },
+    watchSettings: function(cb, onErr){
+      return settingsDoc.onSnapshot(function(s){ cb(s.exists ? s.data() : {}); }, onErr);
+    },
+    setClient: function(id, body){ return withRetry(function(){ return col.doc(id).set(body); }); },
+    deleteClient: function(id){ return withRetry(function(){ return col.doc(id).delete(); }); },
+    setSettings: function(body){ return withRetry(function(){ return settingsDoc.set(body); }); }
+  };
+}
+
+/* ---------- Saving ---------- */
+function toast(msg){
+  var t = $("#toast");
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function(){ t.hidden = true; }, 5000);
+}
+function report(e){
+  var code = e && e.code;
+  if (code === "quota_exceeded") toast("The tracker is full. Remove finished projects to add new ones.");
+  else if (code === "revoked" || code === "not_granted") toast("This view can't save changes anymore. Reload the page.");
+  else toast("That change didn't save. Check your connection and try again.");
+}
+function save(id){
+  if (!clients[id] || !backend) return;
+  if (writing[id]) { dirty[id] = true; return; }
+  writing[id] = true;
+  (function loop(){
+    dirty[id] = false;
+    if (!clients[id]) { writing[id] = false; return; }
+    var body = clone(clients[id]);
+    body.updated = new Date().toISOString();
+    backend.setClient(id, body).then(function(){
+      if (dirty[id]) loop(); else writing[id] = false;
+    }, function(e){ writing[id] = false; report(e); });
+  })();
+}
+function pending(id){ return writing[id] || dirty[id] || metaTimers[id]; }
+
+function onClients(obj){
+  var next = {};
+  Object.keys(obj).forEach(function(id){ next[id] = (pending(id) && clients[id]) ? clients[id] : obj[id]; });
+  Object.keys(clients).forEach(function(id){ if (!next[id] && pending(id)) next[id] = clients[id]; });
+  clients = next;
+  loading = false;
+  if (firstLoad) {
+    firstLoad = false;
+    if (!Object.keys(clients).length) $("#rules").open = true;
+    try { var saved = localStorage.getItem("zk-design-selected"); if (saved && clients[saved]) selectedId = saved; } catch(e){}
+  }
+  if (selectedId && !clients[selectedId]) selectedId = null;
+  render();
+}
+function remember(){ try { if (selectedId) localStorage.setItem("zk-design-selected", selectedId); else localStorage.removeItem("zk-design-selected"); } catch(e){} }
+
+/* ---------- Mutations ---------- */
+function mutate(fn){
+  var id = selectedId;
+  if (!id || !clients[id]) return;
+  var c = clone(clients[id]);
+  c.checks = c.checks || {};
+  fn(c);
+  clients[id] = c;
+  render();
+  save(id);
+}
+function toggle(key, on){
+  mutate(function(c){ if (on) c.checks[key] = new Date().toISOString(); else delete c.checks[key]; });
+}
+function onMeta(key, val, debounce){
+  var id = selectedId;
+  if (!id || !clients[id]) return;
+  var c = clone(clients[id]);
+  c[key] = val;
+  clients[id] = c;
+  if (debounce) {
+    clearTimeout(metaTimers[id]);
+    metaTimers[id] = setTimeout(function(){ delete metaTimers[id]; save(id); }, 500);
+    renderAlert(); renderRoster(); syncMeta();
+  } else {
+    render(); save(id);
+  }
+}
+function select(id){
+  selectedId = id; addOpen = false; remember(); render();
+  if (window.matchMedia && window.matchMedia("(max-width: 820px)").matches) {
+    $("#main").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block:"start" });
+  }
+}
+function removeClient(id){
+  clearTimeout(metaTimers[id]); delete metaTimers[id]; dirty[id] = false;
+  var c = clients[id];
+  delete clients[id];
+  selectedId = null; renderedId = null; remember(); render();
+  backend.deleteClient(id).catch(function(e){ clients[id] = c; render(); report(e); });
+}
+
+/* ---------- Rendering: sidebar ---------- */
+function renderAlert(){
+  var a = $("#alert");
+  a.replaceChildren();
+  var ids = Object.keys(clients);
+  if (loading || !ids.length) { a.hidden = true; return; }
+  a.hidden = false;
+  var list = ids.filter(function(id){ return needsBooking(clients[id]); });
+  if (!list.length) {
+    a.className = "alert is-clear";
+    a.append(el("p", { class:"alert-sub" }, "Every project in design has a next meeting booked."));
+    return;
+  }
+  a.className = "alert";
+  var monday = new Date().getDay() === 1;
+  a.append(
+    el("p", { class:"alert-title" }, list.length + (list.length === 1 ? " project needs" : " projects need") + " a next meeting booked"),
+    el("p", { class:"alert-sub" }, monday ? "It's Monday. Call or email each of them today." : "Call or email to get it on the calendar. Monday is the catch-all."),
+    el("ul", {}, list.map(function(id){
+      return el("li", {}, el("button", { type:"button", class:"chip", onclick:function(){ select(id); } }, nameOf(clients[id])));
+    }))
+  );
+}
+function rosterItem(id){
+  var c = clients[id];
+  var meet = null;
+  if (!isDone(c)) {
+    if (needsBooking(c)) meet = el("span", { class:"client-meet miss" }, "Not booked");
+    else if (needsMeeting(c) && c.nextMeeting) meet = el("span", { class:"client-meet" }, "Next " + fmtDate(c.nextMeeting));
+  }
+  var sub = [c.client, c.model].filter(function(x){ return x && String(x).trim(); }).join(", ");
+  return el("li", {}, el("button", { type:"button", class:"client", "aria-current": id === selectedId ? "true" : "false", onclick:function(){ select(id); } },
+    el("span", { class:"client-name" }, nameOf(c)),
+    el("span", { class:"client-status" }, statusLabel(c)),
+    el("span", { class:"client-sub" }, sub),
+    meet || el("span")
+  ));
+}
+function renderRoster(){
+  var r = $("#roster");
+  r.replaceChildren();
+  if (loading) { r.append(el("p", { class:"muted" }, "Loading projects…")); return; }
+  var ids = Object.keys(clients).sort(function(a, b){
+    var na = needsBooking(clients[a]) ? 0 : 1, nb = needsBooking(clients[b]) ? 0 : 1;
+    if (na !== nb) return na - nb;
+    return nameOf(clients[a]).localeCompare(nameOf(clients[b]));
+  });
+  if (!ids.length) { r.append(el("p", { class:"muted" }, "No projects yet.")); return; }
+  var active = ids.filter(function(id){ return !isDone(clients[id]); });
+  var done = ids.filter(function(id){ return isDone(clients[id]); });
+  if (active.length) r.append(el("ul", { class:"client-list", "aria-label":"Projects in design" }, active.map(rosterItem)));
+  if (done.length) r.append(el("h2", { class:"side-h" }, "Finished"), el("ul", { class:"client-list", "aria-label":"Finished projects" }, done.map(rosterItem)));
+}
+
+/* ---------- Rendering: client view ---------- */
+function buildMeta(){
+  var m = $("#meta");
+  m.replaceChildren();
+  var name = el("input", { class:"name-input", "data-field":"name", "aria-label":"Project name", placeholder:"Project name", autocomplete:"off" });
+  name.addEventListener("input", function(){ onMeta("name", name.value, true); });
+  function field(label, key, type){
+    var id = "f-" + key;
+    var input = el("input", { id:id, type:type, "data-field":key, autocomplete:"off" });
+    if (type === "date") input.addEventListener("change", function(){ onMeta(key, input.value, false); });
+    else input.addEventListener("input", function(){ onMeta(key, input.value, true); });
+    return el("div", { class:"field", "data-wrap":key },
+      el("label", { for:id }, label), input,
+      key === "nextMeeting" ? el("div", { class:"miss-note", id:"missNote", "aria-live":"polite" }) : null);
+  }
+  m.append(name, el("div", { class:"meta" },
+    field("Client", "client", "text"),
+    field("Model", "model", "text"),
+    field("Sales rep", "rep", "text"),
+    field("Discovery call", "discovery", "date"),
+    field("Next meeting", "nextMeeting", "date")
+  ));
+
+  var n = $("#notes");
+  n.replaceChildren();
+  var ta = el("textarea", { id:"notesField", "data-field":"notes", rows:"5", placeholder:"Client preferences, open questions, anything the next meeting needs." });
+  ta.addEventListener("input", function(){ onMeta("notes", ta.value, true); });
+  n.append(el("label", { for:"notesField", class:"notes-label" }, "Notes"), ta);
+
+  var d = $("#danger");
+  d.replaceChildren();
+  var armed = false, timer = null;
+  var btn = el("button", { type:"button", class:"btn btn-quiet" }, "Remove project");
+  btn.addEventListener("click", function(){
+    if (!armed) {
+      armed = true; btn.textContent = "Click again to remove this project"; btn.className = "btn btn-danger";
+      timer = setTimeout(function(){ armed = false; btn.textContent = "Remove project"; btn.className = "btn btn-quiet"; }, 4000);
+    } else { clearTimeout(timer); removeClient(selectedId); }
+  });
+  d.append(btn);
+  renderedId = selectedId;
+}
+function syncMeta(){
+  var c = clients[selectedId];
+  if (!c) return;
+  document.querySelectorAll("#clientView [data-field]").forEach(function(i){
+    if (document.activeElement === i) return;
+    var v = c[i.dataset.field] || "";
+    if (i.value !== v) i.value = v;
+  });
+  var wrap = document.querySelector('[data-wrap="nextMeeting"]');
+  var note = $("#missNote");
+  var need = needsBooking(c);
+  if (wrap) wrap.classList.toggle("miss", need);
+  if (note) note.textContent = !need ? "" : (c.nextMeeting ? "That date has passed. Book the next one." : "Not booked yet.");
+}
+function stepRow(c, key, text){
+  var done = chk(c, key);
+  var input = el("input", { type:"checkbox", "data-key":key });
+  input.checked = done;
+  input.addEventListener("change", function(){ toggle(key, input.checked); });
+  return el("li", {}, el("label", { class:"step" + (done ? " is-done" : "") },
+    input,
+    el("span", { class:"box", "aria-hidden":"true" }),
+    el("span", { class:"step-text" }, text),
+    done ? el("span", { class:"stamp" }, fmtStamp(c.checks[key])) : el("span")
+  ));
+}
+function stepList(c, steps, prefix){
+  return el("ul", { class:"steps" }, steps.map(function(s){ return stepRow(c, (prefix || "") + s.k, textOf(s)); }));
+}
+function phaseCountLabel(c, p){
+  if (phaseDone(c, p.id)) return "Done";
+  if (p.id === "rounds") return "Round " + currentRound(c) + " of 3";
+  var steps = p.steps.slice();
+  if (p.id === "quote") steps = steps.concat(c.decision === "scale" ? SCALE : c.decision === "accepted" ? ACCEPT : []);
+  var n = steps.filter(function(s){ return chk(c, s.k); }).length;
+  return n + " of " + steps.length;
+}
+function renderRounds(c, box){
+  var cr = currentRound(c);
+  for (var n = 1; n <= 3; n++) (function(n){
+    var key = selectedId + "-r" + n;
+    var cnt = roundCount(c, n);
+    var det = el("details", { class:"round" },
+      el("summary", {}, el("span", {}, "Round " + n), el("span", { class:"count" }, cnt === ROUND_STEPS.length ? "Done" : cnt + " of " + ROUND_STEPS.length)),
+      stepList(c, ROUND_STEPS, "r" + n + "_"));
+    det.open = key in roundOpen ? roundOpen[key] : (!c.settled && n === cr);
+    det.addEventListener("toggle", function(){ roundOpen[key] = det.open; });
+    box.append(det);
+  })(n);
+
+  if (chk(c, "r3_review") && !c.settled) {
+    box.append(el("p", { class:"notice" }, "Round 3's review is done and the design isn't settled. Flag this project to Penguin or sales before booking another round."));
+  }
+  var settle = el("div", { class:"settle" });
+  if (!c.settled) {
+    settle.append(
+      el("button", { type:"button", class:"btn btn-primary", "data-key":"settle", onclick:function(){ mutate(function(x){ x.settled = true; }); } }, "Mark design settled"),
+      el("p", {}, "Moves this project to Sven's review.")
+    );
+  } else {
+    settle.append(
+      el("p", {}, "Design settled."),
+      el("button", { type:"button", class:"btn btn-quiet", "data-key":"unsettle", onclick:function(){ mutate(function(x){ x.settled = false; }); } }, "Reopen design rounds")
+    );
+  }
+  box.append(settle);
+}
+function renderQuote(c, box){
+  box.append(stepList(c, PHASES[5].steps));
+  function choice(val, label){
+    return el("button", { type:"button", class:"btn", "data-key":"choice-" + val, "aria-pressed": c.decision === val ? "true" : "false",
+      onclick:function(){ mutate(function(x){ x.decision = x.decision === val ? "" : val; }); } }, label);
+  }
+  box.append(el("div", { class:"choice", role:"group", "aria-label":"Client decision on the quote" },
+    choice("accepted", "They like the quote"), choice("scale", "They want to scale down")));
+  if (c.decision === "accepted") {
+    box.append(el("p", { class:"branch-lead" }, "Straight to contract."), stepList(c, ACCEPT));
+  } else if (c.decision === "scale") {
+    box.append(el("p", { class:"branch-lead" }, "One final revision, then contract. No more rounds after this one."), stepList(c, SCALE));
+  }
+  if (isDone(c)) box.append(el("p", { class:"finish" }, "Contract signed and the folder is with the drafters. Your part is done."));
+}
+function renderBody(){
+  var c = clients[selectedId];
+  var b = $("#body");
+  var focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  b.replaceChildren();
+  var cur = currentPhase(c);
+
+  var nowText;
+  if (isDone(c)) nowText = "Finished.";
+  else if (PHASES[cur].id === "rounds") nowText = "Now: design rounds, round " + currentRound(c) + " of 3";
+  else nowText = "Now: " + PHASES[cur].title.toLowerCase();
+  b.append(el("p", { class:"now" }, nowText));
+
+  b.append(el("ol", { class:"rail", "aria-label":"Phases" }, PHASES.map(function(p, i){
+    var cls = phaseDone(c, p.id) ? "done" : (i === cur ? "current" : "");
+    return el("li", { class:cls }, el("button", { type:"button", "aria-label": p.title + (cls === "done" ? ", done" : cls === "current" ? ", current" : ""),
+      onclick:function(){ document.getElementById("ph-" + p.id).scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block:"start" }); } },
+      el("span", { class:"bar", "aria-hidden":"true" }), p.short));
+  })));
+
+  PHASES.forEach(function(p, i){
+    var complete = phaseDone(c, p.id);
+    var sec = el("section", { id:"ph-" + p.id, class:"phase" + (complete ? " is-complete" : "") + (i === cur ? " is-current" : "") });
+    sec.append(el("div", { class:"phase-head" },
+      el("span", { class:"num", "aria-hidden":"true" }, complete ? "✓" : String(i + 1)),
+      el("div", {}, el("h3", {}, p.title), el("p", { class:"lead" }, p.lead)),
+      el("span", { class:"count" }, phaseCountLabel(c, p))
+    ));
+    var content = el("div", { class:"indent" });
+    if (p.id === "rounds") renderRounds(c, content);
+    else if (p.id === "quote") renderQuote(c, content);
+    else content.append(stepList(c, p.steps));
+    sec.append(content);
+    b.append(sec);
+  });
+
+  if (focusKey) {
+    var f = b.querySelector('[data-key="' + (window.CSS && CSS.escape ? CSS.escape(focusKey) : focusKey) + '"]');
+    if (f) f.focus();
+  }
+}
+
+/* ---------- Add client ---------- */
+function openAdd(){
+  addOpen = true;
+  var v = $("#addView");
+  v.replaceChildren();
+  var name = el("input", { id:"a-name", autocomplete:"off" });
+  var client = el("input", { id:"a-client", autocomplete:"off" });
+  var model = el("input", { id:"a-model", autocomplete:"off" });
+  var rep = el("input", { id:"a-rep", autocomplete:"off" });
+  var disc = el("input", { id:"a-disc", type:"date" });
+  var err = el("p", { class:"form-err", "aria-live":"polite" });
+  var form = el("div", { class:"add-form", role:"group", "aria-label":"Add project" },
+    el("h2", {}, "Add project"),
+    el("div", { class:"field" }, el("label", { for:"a-name" }, "Project name"), name),
+    el("div", { class:"field" }, el("label", { for:"a-client" }, "Client"), client),
+    el("div", { class:"add-grid" },
+      el("div", { class:"field" }, el("label", { for:"a-model" }, "Model"), model),
+      el("div", { class:"field" }, el("label", { for:"a-rep" }, "Sales rep"), rep)),
+    el("div", { class:"field" }, el("label", { for:"a-disc" }, "Discovery call date, if booked"), disc),
+    err,
+    el("div", { class:"form-actions" },
+      el("button", { type:"button", class:"btn btn-primary", onclick:function(){ doAdd(); } }, "Add project"),
+      el("button", { type:"button", class:"btn btn-quiet", onclick:function(){ addOpen = false; render(); } }, "Cancel"))
+  );
+  form.addEventListener("keydown", function(e){ if (e.key === "Enter" && e.target.tagName === "INPUT") { e.preventDefault(); doAdd(); } });
+  function doAdd(){
+    var nm = name.value.trim();
+    if (!nm) { err.textContent = "Add a project name to continue."; name.focus(); return; }
+    if (!backend) { err.textContent = "Still connecting. Try again in a moment."; return; }
+    var id = backend.newId();
+    var checks = {};
+    if (disc.value) checks.prep_book = new Date().toISOString();
+    clients[id] = { name:nm, client:client.value.trim(), model:model.value.trim(), rep:rep.value.trim(), discovery:disc.value, nextMeeting:disc.value,
+      notes:"", checks:checks, settled:false, decision:"", created:new Date().toISOString() };
+    addOpen = false; selectedId = id; renderedId = null; remember();
+    render(); save(id);
+    var ni = document.querySelector("#meta .name-input"); if (ni) ni.blur();
+  }
+  v.append(form);
+  render();
+  name.focus();
+}
+
+/* ---------- Settings ---------- */
+function syncSettings(){
+  [["#setHours", "drawHours"], ["#setDays", "sendDays"]].forEach(function(p){
+    var i = $(p[0]);
+    if (document.activeElement !== i && i.value !== String(settings[p[1]] || "")) i.value = settings[p[1]] || "";
+  });
+}
+function bindSettings(){
+  [["#setHours", "drawHours"], ["#setDays", "sendDays"]].forEach(function(p){
+    var i = $(p[0]);
+    i.addEventListener("input", function(){
+      var v = i.value.replace(/[^0-9.]/g, "");
+      if (v !== i.value) i.value = v;
+      settings[p[1]] = v;
+      if (selectedId && clients[selectedId] && !addOpen) renderBody();
+      clearTimeout(settingsTimer);
+      settingsTimer = setTimeout(function(){
+        settingsTimer = null;
+        if (backend) backend.setSettings({ drawHours:settings.drawHours || "", sendDays:settings.sendDays || "" }).catch(report);
+      }, 600);
+    });
+  });
+}
+
+/* ---------- Main render ---------- */
+function renderMain(){
+  var views = { loading:$("#loadingView"), empty:$("#emptyView"), add:$("#addView"), client:$("#clientView") };
+  function show(name){ Object.keys(views).forEach(function(k){ views[k].hidden = k !== name; }); }
+  if (loadError) { views.loading.replaceChildren(el("p", { class:"muted" }, loadError)); show("loading"); return; }
+  if (loading) { show("loading"); return; }
+  if (addOpen) { show("add"); return; }
+  if (selectedId && clients[selectedId]) {
+    if (renderedId !== selectedId) buildMeta();
+    syncMeta();
+    renderBody();
+    show("client");
+    return;
+  }
+  renderedId = null;
+  $("#emptyText").textContent = Object.keys(clients).length
+    ? "Pick a project to open its checklist, or add a new one."
+    : "No projects yet. Add one as soon as sales books a discovery call. Every project gets its own checklist.";
+  show("empty");
+}
+function render(){ renderAlert(); renderRoster(); renderMain(); }
+
+/* ---------- Init ---------- */
+function onSubError(){
+  if (loading) { loadError = "The shared tracker didn't load. Reload the page to try again."; loading = false; render(); }
+  else toast("Live updates stopped. Reload the page to reconnect.");
+}
+function exportBackup(){
+  var data = { app:"zk-project-design-checklist", version:1, exported:new Date().toISOString(), settings:settings, clients:clients };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type:"application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "design-checklist-backup-" + todayStr() + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+}
+function importBackup(e){
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try {
+      var data = JSON.parse(reader.result);
+      if (!data || typeof data.clients !== "object") throw new Error("bad");
+      var n = Object.keys(data.clients).length;
+      if (!window.confirm("Replace what's here with " + n + (n === 1 ? " project" : " projects") + " from this backup?")) return;
+      clients = data.clients;
+      settings = { drawHours:(data.settings && data.settings.drawHours) || "", sendDays:(data.settings && data.settings.sendDays) || "" };
+      try { localStorage.setItem("zk-design-checklist-v1", JSON.stringify({ clients:clients, settings:settings })); } catch(err){}
+      selectedId = null; renderedId = null; addOpen = false; remember();
+      syncSettings(); render();
+      toast("Backup loaded.");
+    } catch(err){ toast("That file isn't a checklist backup."); }
+    finally { e.target.value = ""; }
+  };
+  reader.readAsText(file);
+}
+function init(){
+  $("#addBtn").addEventListener("click", openAdd);
+  $("#emptyAdd").addEventListener("click", openAdd);
+  bindSettings();
+  render();
+  backend = localBackend();
+  $("#syncNote").textContent = "Saves in this browser on this computer. Download a backup now and then.";
+  backend.watchSettings(function(s){
+    settings = { drawHours: s.drawHours || "", sendDays: s.sendDays || "" };
+    syncSettings();
+  });
+  backend.watchClients(onClients, onSubError);
+  $("#exportBtn").addEventListener("click", exportBackup);
+  $("#importFile").addEventListener("change", importBackup);
+}
+window.addEventListener("error", function(){ toast("Something went wrong on this page. Reload and try again."); });
+init();
+})();
+</script>
+</body>
+</html>
